@@ -56,22 +56,33 @@ function setPlaybackState(state: boolean | null) {
 }
 
 interface SetHandlerParams {
+  setProgress: (n: number) => void
   togglePlayPause: () => void
   playPrev: () => void
   playNext: () => void
+  audioRef: HTMLAudioElement | null
 }
 
 function setHandlers({
+  setProgress,
   playPrev,
   playNext,
-  togglePlayPause,
+  audioRef,
 }: SetHandlerParams) {
   if (!navigator.mediaSession) return
 
-  navigator.mediaSession.setActionHandler('play', () => togglePlayPause())
-  navigator.mediaSession.setActionHandler('pause', () => togglePlayPause())
   navigator.mediaSession.setActionHandler('previoustrack', () => playPrev())
   navigator.mediaSession.setActionHandler('nexttrack', () => playNext())
+  navigator.mediaSession.setActionHandler('seekto', (progress) => {
+    if (progress.seekTime === undefined) {
+      return
+    }
+    if (audioRef) {
+      const time = Math.floor(progress.seekTime)
+      setProgress(time)
+      audioRef.currentTime = time
+    }
+  })
 }
 
 export const manageMediaSession = {

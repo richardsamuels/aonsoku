@@ -20,6 +20,7 @@ import {
   usePlayerLoop,
   usePlayerMediaType,
   usePlayerShuffle,
+  usePlayerRef,
 } from '@/store/player.store'
 import { LoopState } from '@/types/playerContext'
 import { Radio } from '@/types/responses/radios'
@@ -46,8 +47,10 @@ export function PlayerControls({ song, radio }: PlayerControlsProps) {
     playNextSong,
     hasNextSong,
     hasPrevSong,
+    setProgress,
   } = usePlayerActions()
   const currentList = usePlayerCurrentList()
+  const audioRef = usePlayerRef()
 
   useAudioHotkeys('space', togglePlayPause)
   useAudioHotkeys('left', playPrevSong)
@@ -64,11 +67,13 @@ export function PlayerControls({ song, radio }: PlayerControlsProps) {
 
   useEffect(() => {
     manageMediaSession.setHandlers({
+      setProgress,
       togglePlayPause,
+      audioRef,
       playPrev: playPrevSong,
       playNext: playNextSong,
     })
-  }, [playNextSong, playPrevSong, togglePlayPause])
+  }, [audioRef, playNextSong, playPrevSong, togglePlayPause, setProgress])
 
   const shuffleTooltip = isShuffleActive
     ? t('player.tooltips.shuffle.disable')
